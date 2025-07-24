@@ -46,7 +46,7 @@ export default function GenerateSurvey() {
     genders: ["Male", "Female"],
     locations: ["United States"],
     industries: ["IT Sector"],
-    targetCount: 500,
+    targetCount: 1,
     dataSource: "default",
   });
   const [searchQuery, setSearchQuery] = useState("");
@@ -231,7 +231,7 @@ export default function GenerateSurvey() {
         );
 
         // Navigate to thank you page
-        // window.location.href = "/thank-you";
+        window.location.href = "/thank-you";
       } else {
         // API failed, fall back to localStorage method
         handleLocalSurveyCreation(surveyData);
