@@ -34,6 +34,7 @@ import { useApi, useMutation } from "@/hooks/useApi";
 
 export default function GenerateSurvey() {
   const [step, setStep] = useState(1);
+  const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [prompt, setPrompt] = useState("");
   const [questions, setQuestions] = useState([]);
@@ -42,9 +43,10 @@ export default function GenerateSurvey() {
     "openai" | "static" | null
   >(null);
   const [audience, setAudience] = useState({
-    ageGroups: ["18-24", "25-34"],
-    genders: ["Male", "Female"],
-    locations: ["United States"],
+    ageGroups: [],
+    genders: ["Male"],
+    locations: ["India"],
+    state: [""],
     industries: ["IT Sector"],
     targetCount: 1,
     dataSource: "default",
@@ -145,7 +147,7 @@ export default function GenerateSurvey() {
     if (step === 3) {
       // Generate HTML when moving to the preview step
       const html = generateSurveyHtml({
-        title: `${category} Survey`,
+        title: `${category} Survey - (${title})`,
         description: prompt,
         questions,
       });
@@ -169,7 +171,7 @@ export default function GenerateSurvey() {
 
     let htmlData = {
       selectedAudience: ["ayushbirla71@gmail.com", "birlaaaaaa706@gmail.com"],
-      campaignName: `${category} Survey`,
+      campaignName: `${category} Survey - (${title})`,
     };
 
     try {
@@ -184,7 +186,7 @@ export default function GenerateSurvey() {
   const handlePublishSurvey = async () => {
     // Create survey data object
     const surveyData = {
-      title: `${category} Survey`,
+      title: `${category} Survey - (${title})`,
       description: prompt,
       category: category,
       questions: questions,
@@ -203,7 +205,7 @@ export default function GenerateSurvey() {
         console.log("dasssss...", res);
         const html = generateSurveyHtml({
           id: result.id, // Use actual backend survey ID
-          title: `${category} Survey`,
+          title: `${category} Survey - (${title})`,
           description: prompt,
           questions,
         });
@@ -248,7 +250,7 @@ export default function GenerateSurvey() {
     const surveyId = `survey-${Date.now()}`;
     const html = generateSurveyHtml({
       id: surveyId,
-      title: `${category} Survey`,
+      title: `${category} Survey - (${title})`,
       description: prompt,
       questions,
     });
@@ -264,7 +266,7 @@ export default function GenerateSurvey() {
     // Add to sent surveys (localStorage fallback)
     const newSurvey = {
       id: surveyId,
-      title: `${category} Survey`,
+      title: `${category} Survey - (${title})`,
       category: category,
       status: "active" as const,
       responses: 0,
@@ -479,6 +481,25 @@ export default function GenerateSurvey() {
 
                 <div>
                   <Label
+                    htmlFor="title"
+                    className="text-sm font-medium mb-3 block"
+                  >
+                    Survey Title
+                  </Label>
+                  <Input
+                    id="title"
+                    placeholder="title....."
+                    className="h-10 resize-none"
+                    value={title}
+                    onChange={(e) => {
+                      setTitle(e.target.value);
+                      setQuestionsGenerated(false); // Reset questions when prompt changes
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <Label
                     htmlFor="prompt"
                     className="text-sm font-medium mb-3 block"
                   >
@@ -649,7 +670,7 @@ export default function GenerateSurvey() {
 
                 <TabsContent value="preview" className="space-y-4">
                   <SurveyPreview
-                    title={`${category} Survey`}
+                    title={`${category} Survey - (${title})`}
                     description={prompt}
                     questions={questions}
                   />
@@ -661,7 +682,7 @@ export default function GenerateSurvey() {
                       <CodeView code={surveyHtml} language="html" />
                     </CardContent>
                   </Card>
-                  <div className="text-center">
+                  {/* <div className="text-center">
                     <p className="text-sm text-slate-500 mb-2">
                       This multi-page HTML survey includes API integration,
                       progress tracking, and keyboard navigation.
@@ -688,7 +709,7 @@ export default function GenerateSurvey() {
                     >
                       Download HTML File
                     </Button>
-                  </div>
+                  </div> */}
                 </TabsContent>
               </Tabs>
 

@@ -1,36 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Users, Target, Database, RefreshCw, AlertCircle } from "lucide-react"
-import { audienceApi, apiWithFallback, demoData } from "@/lib/api"
-import { useApi } from "@/hooks/useApi"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Users, Target, Database, RefreshCw, AlertCircle } from "lucide-react";
+import { audienceApi, apiWithFallback, demoData } from "@/lib/api";
+import { useApi } from "@/hooks/useApi";
 
 interface AudienceData {
-  ageGroups: string[]
-  genders: string[]
-  locations: string[]
-  industries: string[]
-  targetCount: number
-  dataSource: string
+  ageGroups: string[];
+  genders: string[];
+  locations: string[];
+  industries: string[];
+  targetCount: number;
+  dataSource: string;
 }
 
 interface AudienceSelectorProps {
-  audience: AudienceData
-  onAudienceUpdate: (audience: AudienceData) => void
+  audience: AudienceData;
+  onAudienceUpdate: (audience: AudienceData) => void;
 }
 
-const ageGroupOptions = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
-const genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"]
+const ageGroupOptions = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
+const genderOptions = ["Male", "Female", "Non-binary", "Prefer not to say"];
 
-export default function AudienceSelector({ audience, onAudienceUpdate }: AudienceSelectorProps) {
-  const [customTarget, setCustomTarget] = useState(audience.targetCount.toString())
+export default function AudienceSelector({
+  audience,
+  onAudienceUpdate,
+}: AudienceSelectorProps) {
+  const [customTarget, setCustomTarget] = useState(
+    audience.targetCount.toString()
+  );
 
   // Fetch audience statistics from API
   const {
@@ -38,92 +49,104 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
     loading: statsLoading,
     error: statsError,
     refetch: refetchStats,
-  } = useApi(() => apiWithFallback(() => audienceApi.getAudienceStats(), demoData.audienceStats))
+  } = useApi(() =>
+    apiWithFallback(
+      () => audienceApi.getAudienceStats(),
+      demoData.audienceStats
+    )
+  );
 
-  const stats = audienceStats || demoData.audienceStats
+  const stats = audienceStats || demoData.audienceStats;
 
   // Calculate estimated reach based on selected criteria
   const calculateEstimatedReach = () => {
-    if (!stats) return 0
-
-    let estimatedReach = 0
+    if (!stats) return 0;
+    let estimatedReach = 0;
 
     // Calculate based on age groups
     if (audience.ageGroups.length > 0) {
       const ageReach = audience.ageGroups.reduce((sum, ageGroup) => {
-        return sum + (stats.byAgeGroup[ageGroup] || 0)
-      }, 0)
-      estimatedReach = Math.max(estimatedReach, ageReach)
+        return sum + (stats.byAgeGroup[ageGroup] || 0);
+      }, 0);
+      estimatedReach = Math.max(estimatedReach, ageReach);
     }
 
     // Calculate based on industries
     if (audience.industries.length > 0) {
       const industryReach = audience.industries.reduce((sum, industry) => {
-        return sum + (stats.byIndustry[industry] || 0)
-      }, 0)
-      estimatedReach = Math.max(estimatedReach, industryReach)
+        return sum + (stats.byIndustry[industry] || 0);
+      }, 0);
+      estimatedReach = Math.max(estimatedReach, industryReach);
     }
 
     // Calculate based on locations (countries)
     if (audience.locations.length > 0) {
       const locationReach = audience.locations.reduce((sum, location) => {
-        return sum + (stats.byCountry[location] || 0)
-      }, 0)
-      estimatedReach = Math.max(estimatedReach, locationReach)
+        return sum + (stats.byCountry[location] || 0);
+      }, 0);
+      estimatedReach = Math.max(estimatedReach, locationReach);
     }
 
     // If no specific criteria selected, use total active audience
-    if (audience.ageGroups.length === 0 && audience.industries.length === 0 && audience.locations.length === 0) {
-      estimatedReach = stats.active
+    if (
+      audience.ageGroups.length === 0 &&
+      audience.industries.length === 0 &&
+      audience.locations.length === 0
+    ) {
+      estimatedReach = stats.active;
     }
 
     // Apply intersection logic for more accurate estimation
     if (audience.ageGroups.length > 0 && audience.industries.length > 0) {
       // Rough estimation: reduce by 30% for intersection
-      estimatedReach = Math.floor(estimatedReach * 0.7)
+      estimatedReach = Math.floor(estimatedReach * 0.7);
     }
 
-    return Math.min(estimatedReach, stats.total)
-  }
+    return Math.min(estimatedReach, stats.total);
+  };
 
-  const estimatedReach = calculateEstimatedReach()
+  const estimatedReach = calculateEstimatedReach();
 
   const handleMultiSelect = (field: keyof AudienceData, value: string) => {
-    const currentValues = audience[field] as string[]
+    const currentValues = audience[field] as string[];
     const newValues = currentValues.includes(value)
       ? currentValues.filter((v) => v !== value)
-      : [...currentValues, value]
+      : [...currentValues, value];
 
     onAudienceUpdate({
       ...audience,
       [field]: newValues,
-    })
-  }
+    });
+  };
 
   const handleTargetCountChange = (value: string) => {
-    setCustomTarget(value)
-    const numValue = Number.parseInt(value) || 0
+    setCustomTarget(value);
+    const numValue = Number.parseInt(value) || 0;
     onAudienceUpdate({
       ...audience,
       targetCount: numValue,
-    })
-  }
+    });
+  };
 
   const getAvailableOptions = (type: "locations" | "industries") => {
-    if (!stats) return []
+    if (!stats) return [];
 
     if (type === "locations") {
-      return Object.keys(stats.byCountry)
+      return Object.keys(stats.byCountry);
     } else {
-      return Object.keys(stats.byIndustry)
+      return Object.keys(stats.byIndustry);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
       <div className="mb-4">
-        <h2 className="text-xl font-semibold text-slate-800 mb-2">Define Target Audience</h2>
-        <p className="text-slate-500">Select criteria to target specific audience segments for your survey</p>
+        <h2 className="text-xl font-semibold text-slate-800 mb-2">
+          Define Target Audience
+        </h2>
+        <p className="text-slate-500">
+          Select criteria to target specific audience segments for your survey
+        </p>
       </div>
 
       {/* Error Display */}
@@ -132,11 +155,19 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
           <AlertCircle className="h-4 w-4 text-yellow-600" />
           <div className="flex-1">
             <p className="text-yellow-800 text-sm">
-              ⚠️ Unable to load live audience data. Using demo data for calculations.
+              ⚠️ Unable to load live audience data. Using demo data for
+              calculations.
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={refetchStats} disabled={statsLoading}>
-            <RefreshCw className={`h-4 w-4 ${statsLoading ? "animate-spin" : ""}`} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refetchStats}
+            disabled={statsLoading}
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${statsLoading ? "animate-spin" : ""}`}
+            />
           </Button>
         </div>
       )}
@@ -157,7 +188,11 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                 {ageGroupOptions.map((ageGroup) => (
                   <Button
                     key={ageGroup}
-                    variant={audience.ageGroups.includes(ageGroup) ? "default" : "outline"}
+                    variant={
+                      audience.ageGroups.includes(ageGroup)
+                        ? "default"
+                        : "outline"
+                    }
                     className="justify-start h-auto p-3 text-left"
                     onClick={() => handleMultiSelect("ageGroups", ageGroup)}
                   >
@@ -167,7 +202,9 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                         {statsLoading ? (
                           <RefreshCw className="h-3 w-3 animate-spin" />
                         ) : (
-                          `${(stats?.byAgeGroup[ageGroup] || 0).toLocaleString()} people`
+                          `${(
+                            stats?.byAgeGroup[ageGroup] || 0
+                          ).toLocaleString()} people`
                         )}
                       </div>
                     </div>
@@ -187,7 +224,9 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                 {genderOptions.map((gender) => (
                   <Button
                     key={gender}
-                    variant={audience.genders.includes(gender) ? "default" : "outline"}
+                    variant={
+                      audience.genders.includes(gender) ? "default" : "outline"
+                    }
                     className="justify-start h-auto p-3"
                     onClick={() => handleMultiSelect("genders", gender)}
                   >
@@ -197,7 +236,9 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                         {statsLoading ? (
                           <RefreshCw className="h-3 w-3 animate-spin" />
                         ) : (
-                          `${(stats?.byGender[gender] || 0).toLocaleString()} people`
+                          `${(
+                            stats?.byGender[gender] || 0
+                          ).toLocaleString()} people`
                         )}
                       </div>
                     </div>
@@ -217,7 +258,11 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                 {getAvailableOptions("locations").map((location) => (
                   <Button
                     key={location}
-                    variant={audience.locations.includes(location) ? "default" : "outline"}
+                    variant={
+                      audience.locations.includes(location)
+                        ? "default"
+                        : "outline"
+                    }
                     className="justify-start h-auto p-3"
                     onClick={() => handleMultiSelect("locations", location)}
                   >
@@ -227,7 +272,9 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                         {statsLoading ? (
                           <RefreshCw className="h-3 w-3 animate-spin" />
                         ) : (
-                          `${(stats?.byCountry[location] || 0).toLocaleString()} people`
+                          `${(
+                            stats?.byCountry[location] || 0
+                          ).toLocaleString()} people`
                         )}
                       </div>
                     </div>
@@ -247,7 +294,11 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                 {getAvailableOptions("industries").map((industry) => (
                   <Button
                     key={industry}
-                    variant={audience.industries.includes(industry) ? "default" : "outline"}
+                    variant={
+                      audience.industries.includes(industry)
+                        ? "default"
+                        : "outline"
+                    }
                     className="justify-start h-auto p-3"
                     onClick={() => handleMultiSelect("industries", industry)}
                   >
@@ -257,7 +308,9 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                         {statsLoading ? (
                           <RefreshCw className="h-3 w-3 animate-spin" />
                         ) : (
-                          `${(stats?.byIndustry[industry] || 0).toLocaleString()} people`
+                          `${(
+                            stats?.byIndustry[industry] || 0
+                          ).toLocaleString()} people`
                         )}
                       </div>
                     </div>
@@ -281,11 +334,17 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
             <CardContent className="space-y-4">
               <div className="space-y-3">
                 <div>
-                  <Label className="text-sm font-medium text-slate-600">Age Groups</Label>
+                  <Label className="text-sm font-medium text-slate-600">
+                    Age Groups
+                  </Label>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {audience.ageGroups.length > 0 ? (
                       audience.ageGroups.map((age) => (
-                        <Badge key={age} variant="secondary" className="text-xs">
+                        <Badge
+                          key={age}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {age}
                         </Badge>
                       ))
@@ -296,46 +355,70 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-600">Gender</Label>
+                  <Label className="text-sm font-medium text-slate-600">
+                    Gender
+                  </Label>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {audience.genders.length > 0 ? (
                       audience.genders.map((gender) => (
-                        <Badge key={gender} variant="secondary" className="text-xs">
+                        <Badge
+                          key={gender}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {gender}
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-slate-400">All genders</span>
+                      <span className="text-sm text-slate-400">
+                        All genders
+                      </span>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-600">Locations</Label>
+                  <Label className="text-sm font-medium text-slate-600">
+                    Locations
+                  </Label>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {audience.locations.length > 0 ? (
                       audience.locations.map((location) => (
-                        <Badge key={location} variant="secondary" className="text-xs">
+                        <Badge
+                          key={location}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {location}
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-slate-400">All locations</span>
+                      <span className="text-sm text-slate-400">
+                        All locations
+                      </span>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <Label className="text-sm font-medium text-slate-600">Industries</Label>
+                  <Label className="text-sm font-medium text-slate-600">
+                    Industries
+                  </Label>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {audience.industries.length > 0 ? (
                       audience.industries.map((industry) => (
-                        <Badge key={industry} variant="secondary" className="text-xs">
+                        <Badge
+                          key={industry}
+                          variant="secondary"
+                          className="text-xs"
+                        >
                           {industry}
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-slate-400">All industries</span>
+                      <span className="text-sm text-slate-400">
+                        All industries
+                      </span>
                     )}
                   </div>
                 </div>
@@ -345,9 +428,15 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-slate-600">Estimated Reach</span>
+                  <span className="text-sm font-medium text-slate-600">
+                    Estimated Reach
+                  </span>
                   <span className="text-lg font-bold text-violet-600">
-                    {statsLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : estimatedReach.toLocaleString()}
+                    {statsLoading ? (
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                    ) : (
+                      estimatedReach.toLocaleString()
+                    )}
                   </span>
                 </div>
                 <div className="text-xs text-slate-500">
@@ -378,23 +467,33 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
                   max={estimatedReach}
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  Maximum: {estimatedReach.toLocaleString()} (based on selected criteria)
+                  Maximum: {estimatedReach.toLocaleString()} (based on selected
+                  criteria)
                 </p>
               </div>
 
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Target</span>
-                  <span className="font-medium">{audience.targetCount.toLocaleString()}</span>
+                  <span className="font-medium">
+                    {audience.targetCount.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Available</span>
-                  <span className="font-medium">{estimatedReach.toLocaleString()}</span>
+                  <span className="font-medium">
+                    {estimatedReach.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Coverage</span>
                   <span className="font-medium">
-                    {estimatedReach > 0 ? Math.round((audience.targetCount / estimatedReach) * 100) : 0}%
+                    {estimatedReach > 0
+                      ? Math.round(
+                          (audience.targetCount / estimatedReach) * 100
+                        )
+                      : 0}
+                    %
                   </span>
                 </div>
               </div>
@@ -402,7 +501,8 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
               {audience.targetCount > estimatedReach && (
                 <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-yellow-800 text-sm">
-                    ⚠️ Target exceeds available audience. Consider adjusting criteria or target count.
+                    ⚠️ Target exceeds available audience. Consider adjusting
+                    criteria or target count.
                   </p>
                 </div>
               )}
@@ -420,22 +520,28 @@ export default function AudienceSelector({ audience, onAudienceUpdate }: Audienc
             <CardContent>
               <Select
                 value={audience.dataSource}
-                onValueChange={(value) => onAudienceUpdate({ ...audience, dataSource: value })}
+                onValueChange={(value) =>
+                  onAudienceUpdate({ ...audience, dataSource: value })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select data source" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="default">Default Audience Database</SelectItem>
+                  <SelectItem value="default">
+                    Default Audience Database
+                  </SelectItem>
                   <SelectItem value="imported">Imported Contacts</SelectItem>
                   <SelectItem value="segments">Custom Segments</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-xs text-slate-500 mt-2">Choose the source for your survey distribution</p>
+              <p className="text-xs text-slate-500 mt-2">
+                Choose the source for your survey distribution
+              </p>
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,23 +1,27 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface SurveyPreviewProps {
-  title: string
-  description: string
+  title: string;
+  description: string;
   questions: {
-    id: string
-    type: string
-    question: string
-    options?: string[]
-    required: boolean
-  }[]
+    id: string;
+    type: string;
+    question: string;
+    options?: string[];
+    required: boolean;
+  }[];
 }
 
-export default function SurveyPreview({ title, description, questions }: SurveyPreviewProps) {
+export default function SurveyPreview({
+  title,
+  description,
+  questions,
+}: SurveyPreviewProps) {
   return (
     <div className="space-y-4">
       <Card className="border-2 border-violet-200 mb-4">
@@ -29,12 +33,17 @@ export default function SurveyPreview({ title, description, questions }: SurveyP
 
       <div className="space-y-3">
         {questions.map((q, index) => (
-          <Card key={q.id} className="border border-slate-200 hover:border-slate-300 transition-colors">
+          <Card
+            key={q.id}
+            className="border border-slate-200 hover:border-slate-300 transition-colors"
+          >
             <CardContent className="pt-4 pb-4">
               <div className="mb-4">
                 <h3 className="text-lg font-medium text-slate-800">
                   {index + 1}. {q.question}
-                  {q.required && <span className="ml-2 text-red-500 text-sm">*</span>}
+                  {q.required && (
+                    <span className="ml-2 text-red-500 text-sm">*</span>
+                  )}
                 </h3>
               </div>
 
@@ -42,8 +51,14 @@ export default function SurveyPreview({ title, description, questions }: SurveyP
                 <RadioGroup className="space-y-2">
                   {q.options?.map((option, i) => (
                     <div key={i} className="flex items-center space-x-2">
-                      <RadioGroupItem value={`option-${i}`} id={`option-${q.id}-${i}`} />
-                      <Label htmlFor={`option-${q.id}-${i}`} className="text-sm font-normal">
+                      <RadioGroupItem
+                        value={`option-${i}`}
+                        id={`option-${q.id}-${i}`}
+                      />
+                      <Label
+                        htmlFor={`option-${q.id}-${i}`}
+                        className="text-sm font-normal"
+                      >
                         {option}
                       </Label>
                     </div>
@@ -56,7 +71,10 @@ export default function SurveyPreview({ title, description, questions }: SurveyP
                   {q.options?.map((option, i) => (
                     <div key={i} className="flex items-center space-x-3">
                       <Checkbox id={`checkbox-${q.id}-${i}`} />
-                      <Label htmlFor={`checkbox-${q.id}-${i}`} className="text-sm font-normal">
+                      <Label
+                        htmlFor={`checkbox-${q.id}-${i}`}
+                        className="text-sm font-normal"
+                      >
                         {option}
                       </Label>
                     </div>
@@ -65,7 +83,11 @@ export default function SurveyPreview({ title, description, questions }: SurveyP
               )}
 
               {q.type === "text" && (
-                <Textarea placeholder="Type your answer here..." className="resize-none h-24" disabled />
+                <Textarea
+                  placeholder="Type your answer here..."
+                  className="resize-none h-24"
+                  disabled
+                />
               )}
 
               {q.type === "rating" && (
@@ -94,12 +116,18 @@ export default function SurveyPreview({ title, description, questions }: SurveyP
 
       <Card className="bg-slate-50 border-slate-200">
         <CardContent className="pt-6 text-center">
-          <Button size="lg" disabled className="bg-violet-600 hover:bg-violet-700">
+          <Button
+            size="lg"
+            disabled
+            className="bg-violet-600 hover:bg-violet-700"
+          >
             Submit Survey
           </Button>
-          <p className="text-xs text-slate-500 mt-3">This is a preview - the actual survey will be interactive</p>
+          <p className="text-xs text-slate-500 mt-3">
+            This is a preview - the actual survey will be interactive
+          </p>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

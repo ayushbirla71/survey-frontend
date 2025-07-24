@@ -610,6 +610,7 @@ export const audienceApi = {
       byAgeGroup: Record<string, number>
       byGender: Record<string, number>
       byCountry: Record<string, number>
+      byState: Record<string, number>
       byIndustry: Record<string, number>
     }>
   > => {
