@@ -1,5 +1,5 @@
 // API configuration and base functions
-const API_BASE_URL = "https://518fc852-4eb8-489a-a3ac-03351eb3fd2d-00-3iasr5f5e5urj.spock.replit.dev"
+const API_BASE_URL = "https://survey-backend-ts76.onrender.com"
 
 // Get JWT token from localStorage or your auth system
 const getAuthToken = (): string | null => {
