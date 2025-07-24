@@ -1,29 +1,46 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, ArrowRight, Search, Eye, Code, RefreshCw, Sparkles, AlertCircle } from "lucide-react"
-import SurveyPreview from "@/components/survey-preview"
-import QuestionEditor from "@/components/question-editor"
-import AudienceSelector from "@/components/audience-selector"
-import Link from "next/link"
-import CodeView from "@/components/code-view"
-import { generateSurveyHtml } from "@/lib/survey-generator"
-import { categoriesApi, surveyApi, questionGenerationApi, apiWithFallback, demoData } from "@/lib/api"
-import { useApi, useMutation } from "@/hooks/useApi"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Search,
+  Eye,
+  Code,
+  RefreshCw,
+  Sparkles,
+  AlertCircle,
+} from "lucide-react";
+import SurveyPreview from "@/components/survey-preview";
+import QuestionEditor from "@/components/question-editor";
+import AudienceSelector from "@/components/audience-selector";
+import Link from "next/link";
+import CodeView from "@/components/code-view";
+import { generateSurveyHtml } from "@/lib/survey-generator";
+import {
+  categoriesApi,
+  surveyApi,
+  questionGenerationApi,
+  apiWithFallback,
+  demoData,
+} from "@/lib/api";
+import { useApi, useMutation } from "@/hooks/useApi";
 
 export default function GenerateSurvey() {
-  const [step, setStep] = useState(1)
-  const [category, setCategory] = useState("")
-  const [prompt, setPrompt] = useState("")
-  const [questions, setQuestions] = useState([])
-  const [questionsGenerated, setQuestionsGenerated] = useState(false)
-  const [generationMethod, setGenerationMethod] = useState<"openai" | "static" | null>(null)
+  const [step, setStep] = useState(1);
+  const [category, setCategory] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [questions, setQuestions] = useState([]);
+  const [questionsGenerated, setQuestionsGenerated] = useState(false);
+  const [generationMethod, setGenerationMethod] = useState<
+    "openai" | "static" | null
+  >(null);
   const [audience, setAudience] = useState({
     ageGroups: ["18-24", "25-34"],
     genders: ["Male", "Female"],
@@ -31,16 +48,18 @@ export default function GenerateSurvey() {
     industries: ["IT Sector"],
     targetCount: 500,
     dataSource: "default",
-  })
-  const [searchQuery, setSearchQuery] = useState("")
-  const [surveyHtml, setSurveyHtml] = useState("")
+  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [surveyHtml, setSurveyHtml] = useState("");
 
   // API calls
   const {
     data: categories,
     loading: categoriesLoading,
     error: categoriesError,
-  } = useApi(() => apiWithFallback(() => categoriesApi.getCategories(), demoData.categories))
+  } = useApi(() =>
+    apiWithFallback(() => categoriesApi.getCategories(), demoData.categories)
+  );
 
   const {
     data: questionConfig,
@@ -52,57 +71,75 @@ export default function GenerateSurvey() {
       openaiConnected: false,
       availableCategories: demoData.categories,
       settings: {
-        openai: { model: "gpt-4o", maxQuestions: 10, temperature: 0.7, questionTypes: [] },
+        openai: {
+          model: "gpt-4o",
+          maxQuestions: 10,
+          temperature: 0.7,
+          questionTypes: [],
+        },
         static: { defaultQuestionsPerCategory: 5 },
       },
-    }),
-  )
+    })
+  );
 
-  const { mutate: createSurvey, loading: createLoading, error: createError } = useMutation(surveyApi.createSurvey)
+  const {
+    mutate: createSurvey,
+    loading: createLoading,
+    error: createError,
+  } = useMutation(surveyApi.createSurvey);
+
+  const {
+    mutate: htmlCreate,
+    loading: htmlCreateLoading,
+    error: htmlCreateError,
+  } = useMutation(surveyApi.htmlCreate);
+
   const {
     mutate: generateQuestions,
     loading: generatingQuestions,
     error: generationError,
-  } = useMutation(questionGenerationApi.generateQuestions)
+  } = useMutation(questionGenerationApi.generateQuestions);
 
-  const displayCategories = categories || demoData.categories
-  const filteredCategories = displayCategories.filter((cat) => cat.toLowerCase().includes(searchQuery.toLowerCase()))
+  const displayCategories = categories || demoData.categories;
+  const filteredCategories = displayCategories.filter((cat) =>
+    cat.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Generate questions when category and prompt are set
   useEffect(() => {
     if (category && prompt && !questionsGenerated) {
-      handleGenerateQuestions()
+      handleGenerateQuestions();
     }
-  }, [category, prompt])
+  }, [category, prompt]);
 
   const handleGenerateQuestions = async () => {
-    if (!category || !prompt) return
+    if (!category || !prompt) return;
 
     try {
       const result = await generateQuestions({
         category: category,
         description: prompt,
         questionCount: 5,
-      })
+      });
 
       if (result && result.questions) {
-        setQuestions(result.questions)
-        setGenerationMethod(result.generatedWith)
-        setQuestionsGenerated(true)
+        setQuestions(result.questions);
+        setGenerationMethod(result.generatedWith);
+        setQuestionsGenerated(true);
       } else {
         // Fallback to demo questions
-        setQuestions(demoData.generatedQuestions.questions)
-        setGenerationMethod("static")
-        setQuestionsGenerated(true)
+        setQuestions(demoData.generatedQuestions.questions);
+        setGenerationMethod("static");
+        setQuestionsGenerated(true);
       }
     } catch (error) {
-      console.error("Failed to generate questions:", error)
+      console.error("Failed to generate questions:", error);
       // Use demo questions as fallback
-      setQuestions(demoData.generatedQuestions.questions)
-      setGenerationMethod("static")
-      setQuestionsGenerated(true)
+      setQuestions(demoData.generatedQuestions.questions);
+      setGenerationMethod("static");
+      setQuestionsGenerated(true);
     }
-  }
+  };
 
   const nextStep = () => {
     if (step === 3) {
@@ -111,21 +148,38 @@ export default function GenerateSurvey() {
         title: `${category} Survey`,
         description: prompt,
         questions,
-      })
-      setSurveyHtml(html)
+      });
+      setSurveyHtml(html);
     }
-    setStep(step + 1)
-  }
+    setStep(step + 1);
+  };
 
-  const prevStep = () => setStep(step - 1)
+  const prevStep = () => setStep(step - 1);
 
   const handleQuestionUpdate = (updatedQuestions) => {
-    setQuestions(updatedQuestions)
-  }
+    setQuestions(updatedQuestions);
+  };
 
   const handleAudienceUpdate = (updatedAudience) => {
-    setAudience(updatedAudience)
-  }
+    setAudience(updatedAudience);
+  };
+
+  const handleHTMLCreateApi = async (id: string) => {
+    // /api/surveys/:id/create-html
+
+    let htmlData = {
+      selectedAudience: ["ayushbirla71@gmail.com", "birlaaaaaa706@gmail.com"],
+      campaignName: `${category} Survey`,
+    };
+
+    try {
+      const result = await htmlCreate(id, htmlData);
+      if (result && result.survey) {
+        console.log("send Data is", result.survey);
+        return result;
+      }
+    } catch (error) {}
+  };
 
   const handlePublishSurvey = async () => {
     // Create survey data object
@@ -135,53 +189,77 @@ export default function GenerateSurvey() {
       category: category,
       questions: questions,
       audience: audience,
-    }
+    };
 
     try {
       // Try to create survey via API
-      const result = await createSurvey(surveyData)
+      const result = await createSurvey(surveyData);
 
       if (result && result.id) {
         // API success - use the actual survey ID from backend
+
+        let res = await handleHTMLCreateApi(result.id);
+
+        console.log("dasssss...", res);
         const html = generateSurveyHtml({
           id: result.id, // Use actual backend survey ID
           title: `${category} Survey`,
           description: prompt,
           questions,
-        })
-        setSurveyHtml(html)
-        localStorage.setItem("lastSurveyHtml", html)
-        localStorage.setItem("lastSurveyTitle", `${category.toLowerCase().replace(/\s+/g, "-")}_survey`)
-        localStorage.setItem("lastSurveyAudience", audience.targetCount.toString())
-        localStorage.setItem("lastSurveyData", JSON.stringify({ ...surveyData, id: result.id }))
+        });
+        if (res?.survey.htmlContent) {
+          setSurveyHtml(res?.survey?.htmlContent);
+          localStorage.setItem("lastSurveyHtml", res?.survey?.htmlContent);
+          localStorage.setItem("surveyUrl", res?.survey?.publicUrl);
+        } else {
+          setSurveyHtml(html);
+          localStorage.setItem("lastSurveyHtml", html);
+          localStorage.setItem("surveyUrl", "");
+        }
+
+        localStorage.setItem(
+          "lastSurveyTitle",
+          `${category.toLowerCase().replace(/\s+/g, "-")}_survey`
+        );
+        localStorage.setItem(
+          "lastSurveyAudience",
+          audience.targetCount.toString()
+        );
+        localStorage.setItem(
+          "lastSurveyData",
+          JSON.stringify({ ...surveyData, id: result.id })
+        );
 
         // Navigate to thank you page
-        window.location.href = "/thank-you"
+        // window.location.href = "/thank-you";
       } else {
         // API failed, fall back to localStorage method
-        handleLocalSurveyCreation(surveyData)
+        handleLocalSurveyCreation(surveyData);
       }
     } catch (error) {
-      console.error("Failed to create survey via API:", error)
+      console.error("Failed to create survey via API:", error);
       // Fall back to localStorage method
-      handleLocalSurveyCreation(surveyData)
+      handleLocalSurveyCreation(surveyData);
     }
-  }
+  };
 
   const handleLocalSurveyCreation = (surveyData) => {
     // Save to localStorage for thank you page
-    const surveyId = `survey-${Date.now()}`
+    const surveyId = `survey-${Date.now()}`;
     const html = generateSurveyHtml({
       id: surveyId,
       title: `${category} Survey`,
       description: prompt,
       questions,
-    })
-    setSurveyHtml(html)
-    localStorage.setItem("lastSurveyHtml", html)
-    localStorage.setItem("lastSurveyTitle", `${category.toLowerCase().replace(/\s+/g, "-")}_survey`)
-    localStorage.setItem("lastSurveyAudience", audience.targetCount.toString())
-    localStorage.setItem("lastSurveyData", JSON.stringify(surveyData))
+    });
+    setSurveyHtml(html);
+    localStorage.setItem("lastSurveyHtml", html);
+    localStorage.setItem(
+      "lastSurveyTitle",
+      `${category.toLowerCase().replace(/\s+/g, "-")}_survey`
+    );
+    localStorage.setItem("lastSurveyAudience", audience.targetCount.toString());
+    localStorage.setItem("lastSurveyData", JSON.stringify(surveyData));
 
     // Add to sent surveys (localStorage fallback)
     const newSurvey = {
@@ -193,16 +271,18 @@ export default function GenerateSurvey() {
       target: audience.targetCount,
       completionRate: 0,
       createdAt: new Date().toISOString().split("T")[0],
-    }
+    };
 
     // Save to localStorage to persist across page reloads
-    const existingSurveys = JSON.parse(localStorage.getItem("sentSurveys") || "[]")
-    existingSurveys.unshift(newSurvey)
-    localStorage.setItem("sentSurveys", JSON.stringify(existingSurveys))
+    const existingSurveys = JSON.parse(
+      localStorage.getItem("sentSurveys") || "[]"
+    );
+    existingSurveys.unshift(newSurvey);
+    localStorage.setItem("sentSurveys", JSON.stringify(existingSurveys));
 
     // Navigate to thank you page
-    window.location.href = "/thank-you"
-  }
+    window.location.href = "/thank-you";
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -215,29 +295,47 @@ export default function GenerateSurvey() {
               </Link>
             </Button>
             <div>
-              <h1 className="text-3xl font-bold text-slate-800">Generate Survey</h1>
-              <p className="text-slate-500 mt-1">Create and customize your survey with AI-powered questions</p>
+              <h1 className="text-3xl font-bold text-slate-800">
+                Generate Survey
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Create and customize your survey with AI-powered questions
+              </p>
             </div>
           </div>
 
           {/* Progress Steps */}
           <div className="bg-white rounded-lg p-6 shadow-sm mb-6">
             <div className="flex justify-between items-center">
-              <div className={`flex flex-col items-center ${step >= 1 ? "text-violet-600" : "text-slate-400"}`}>
+              <div
+                className={`flex flex-col items-center ${
+                  step >= 1 ? "text-violet-600" : "text-slate-400"
+                }`}
+              >
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
-                    step >= 1 ? "bg-violet-100 text-violet-600" : "bg-slate-100 text-slate-400"
+                    step >= 1
+                      ? "bg-violet-100 text-violet-600"
+                      : "bg-slate-100 text-slate-400"
                   }`}
                 >
                   1
                 </div>
-                <span className="mt-2 text-sm font-medium">Category & Prompt</span>
+                <span className="mt-2 text-sm font-medium">
+                  Category & Prompt
+                </span>
               </div>
               <div className="flex-1 h-px bg-slate-200 mx-4" />
-              <div className={`flex flex-col items-center ${step >= 2 ? "text-violet-600" : "text-slate-400"}`}>
+              <div
+                className={`flex flex-col items-center ${
+                  step >= 2 ? "text-violet-600" : "text-slate-400"
+                }`}
+              >
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
-                    step >= 2 ? "bg-violet-100 text-violet-600" : "bg-slate-100 text-slate-400"
+                    step >= 2
+                      ? "bg-violet-100 text-violet-600"
+                      : "bg-slate-100 text-slate-400"
                   }`}
                 >
                   2
@@ -245,26 +343,42 @@ export default function GenerateSurvey() {
                 <span className="mt-2 text-sm font-medium">Edit Questions</span>
               </div>
               <div className="flex-1 h-px bg-slate-200 mx-4" />
-              <div className={`flex flex-col items-center ${step >= 3 ? "text-violet-600" : "text-slate-400"}`}>
+              <div
+                className={`flex flex-col items-center ${
+                  step >= 3 ? "text-violet-600" : "text-slate-400"
+                }`}
+              >
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
-                    step >= 3 ? "bg-violet-100 text-violet-600" : "bg-slate-100 text-slate-400"
+                    step >= 3
+                      ? "bg-violet-100 text-violet-600"
+                      : "bg-slate-100 text-slate-400"
                   }`}
                 >
                   3
                 </div>
-                <span className="mt-2 text-sm font-medium">Target Audience</span>
+                <span className="mt-2 text-sm font-medium">
+                  Target Audience
+                </span>
               </div>
               <div className="flex-1 h-px bg-slate-200 mx-4" />
-              <div className={`flex flex-col items-center ${step >= 4 ? "text-violet-600" : "text-slate-400"}`}>
+              <div
+                className={`flex flex-col items-center ${
+                  step >= 4 ? "text-violet-600" : "text-slate-400"
+                }`}
+              >
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold ${
-                    step >= 4 ? "bg-violet-100 text-violet-600" : "bg-slate-100 text-slate-400"
+                    step >= 4
+                      ? "bg-violet-100 text-violet-600"
+                      : "bg-slate-100 text-slate-400"
                   }`}
                 >
                   4
                 </div>
-                <span className="mt-2 text-sm font-medium">Preview & Publish</span>
+                <span className="mt-2 text-sm font-medium">
+                  Preview & Publish
+                </span>
               </div>
             </div>
           </div>
@@ -276,9 +390,12 @@ export default function GenerateSurvey() {
             <div className="flex items-center gap-2">
               <AlertCircle className="h-4 w-4 text-yellow-600" />
               <p className="text-yellow-800 text-sm">
-                ⚠️ {categoriesError && `Categories API failed: ${categoriesError}. `}
+                ⚠️{" "}
+                {categoriesError &&
+                  `Categories API failed: ${categoriesError}. `}
                 {createError && `Survey creation failed: ${createError}. `}
-                {generationError && `Question generation failed: ${generationError}. `}
+                {generationError &&
+                  `Question generation failed: ${generationError}. `}
                 {configError && `Configuration failed: ${configError}. `}
                 Using fallback data where needed.
               </p>
@@ -292,8 +409,13 @@ export default function GenerateSurvey() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-blue-600" />
               <p className="text-blue-800 text-sm">
-                Question Generation: {questionConfig.mode === "openai" ? "AI-Powered" : "Template-Based"}
-                {questionConfig.mode === "openai" && !questionConfig.openaiConnected && " (Fallback to templates)"}
+                Question Generation:{" "}
+                {questionConfig.mode === "openai"
+                  ? "AI-Powered"
+                  : "Template-Based"}
+                {questionConfig.mode === "openai" &&
+                  !questionConfig.openaiConnected &&
+                  " (Fallback to templates)"}
               </p>
             </div>
           </div>
@@ -305,16 +427,22 @@ export default function GenerateSurvey() {
           {step === 1 && (
             <div className="p-8">
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-slate-800 mb-2">Choose Category & Describe Your Survey</h2>
+                <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                  Choose Category & Describe Your Survey
+                </h2>
                 <p className="text-slate-500">
-                  Select a category and describe what kind of survey you want to create. Questions will be generated
-                  automatically based on your input.
+                  Select a category and describe what kind of survey you want to
+                  create. Questions will be generated automatically based on
+                  your input.
                 </p>
               </div>
 
               <div className="space-y-8">
                 <div>
-                  <Label htmlFor="category" className="text-sm font-medium mb-3 block">
+                  <Label
+                    htmlFor="category"
+                    className="text-sm font-medium mb-3 block"
+                  >
                     Select Category
                   </Label>
                   <div className="relative mb-4">
@@ -338,8 +466,8 @@ export default function GenerateSurvey() {
                         variant={category === cat ? "default" : "outline"}
                         className="justify-start h-auto p-3 text-left text-sm"
                         onClick={() => {
-                          setCategory(cat)
-                          setQuestionsGenerated(false) // Reset questions when category changes
+                          setCategory(cat);
+                          setQuestionsGenerated(false); // Reset questions when category changes
                         }}
                         disabled={categoriesLoading}
                       >
@@ -350,7 +478,10 @@ export default function GenerateSurvey() {
                 </div>
 
                 <div>
-                  <Label htmlFor="prompt" className="text-sm font-medium mb-3 block">
+                  <Label
+                    htmlFor="prompt"
+                    className="text-sm font-medium mb-3 block"
+                  >
                     Describe Your Survey
                   </Label>
                   <Textarea
@@ -359,13 +490,14 @@ export default function GenerateSurvey() {
                     className="h-32 resize-none"
                     value={prompt}
                     onChange={(e) => {
-                      setPrompt(e.target.value)
-                      setQuestionsGenerated(false) // Reset questions when prompt changes
+                      setPrompt(e.target.value);
+                      setQuestionsGenerated(false); // Reset questions when prompt changes
                     }}
                   />
                   <p className="text-xs text-slate-500 mt-2">
-                    Example: "I want to understand customer satisfaction with our mobile app, focusing on usability and
-                    feature preferences."
+                    Example: "I want to understand customer satisfaction with
+                    our mobile app, focusing on usability and feature
+                    preferences."
                   </p>
                 </div>
 
@@ -375,7 +507,8 @@ export default function GenerateSurvey() {
                     <div className="flex items-center gap-2">
                       <RefreshCw className="h-4 w-4 animate-spin text-violet-600" />
                       <p className="text-violet-800 text-sm">
-                        Generating questions based on your category and description...
+                        Generating questions based on your category and
+                        description...
                       </p>
                     </div>
                   </div>
@@ -390,7 +523,9 @@ export default function GenerateSurvey() {
                         {generationMethod === "openai" ? "AI" : "templates"}
                       </p>
                     </div>
-                    <p className="text-green-700 text-xs">You can customize these questions in the next step.</p>
+                    <p className="text-green-700 text-xs">
+                      You can customize these questions in the next step.
+                    </p>
                   </div>
                 )}
               </div>
@@ -402,7 +537,13 @@ export default function GenerateSurvey() {
                 </Button>
                 <Button
                   onClick={nextStep}
-                  disabled={!category || !prompt || categoriesLoading || generatingQuestions || !questionsGenerated}
+                  disabled={
+                    !category ||
+                    !prompt ||
+                    categoriesLoading ||
+                    generatingQuestions ||
+                    !questionsGenerated
+                  }
                 >
                   {generatingQuestions ? (
                     <>
@@ -424,18 +565,25 @@ export default function GenerateSurvey() {
           {step === 2 && (
             <div className="p-8">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-slate-800 mb-2">Customize Your Questions</h2>
+                <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                  Customize Your Questions
+                </h2>
                 <p className="text-slate-500">
-                  Edit, reorder, and customize the questions generated for your {category} survey
+                  Edit, reorder, and customize the questions generated for your{" "}
+                  {category} survey
                   {generationMethod && (
                     <span className="ml-2 text-xs bg-violet-100 text-violet-700 px-2 py-1 rounded">
-                      Generated with {generationMethod === "openai" ? "AI" : "Templates"}
+                      Generated with{" "}
+                      {generationMethod === "openai" ? "AI" : "Templates"}
                     </span>
                   )}
                 </p>
               </div>
 
-              <QuestionEditor questions={questions} onQuestionsUpdate={handleQuestionUpdate} />
+              <QuestionEditor
+                questions={questions}
+                onQuestionsUpdate={handleQuestionUpdate}
+              />
 
               <div className="flex justify-between pt-8 border-t border-slate-200 mt-8">
                 <Button variant="outline" onClick={prevStep}>
@@ -453,7 +601,10 @@ export default function GenerateSurvey() {
           {/* Step 3: Target Audience */}
           {step === 3 && (
             <div className="p-8">
-              <AudienceSelector audience={audience} onAudienceUpdate={handleAudienceUpdate} />
+              <AudienceSelector
+                audience={audience}
+                onAudienceUpdate={handleAudienceUpdate}
+              />
 
               <div className="flex justify-between pt-8 border-t border-slate-200 mt-8">
                 <Button variant="outline" onClick={prevStep}>
@@ -472,15 +623,21 @@ export default function GenerateSurvey() {
           {step === 4 && (
             <div className="p-8">
               <div className="mb-6">
-                <h2 className="text-xl font-semibold text-slate-800 mb-2">Preview & Publish Survey</h2>
+                <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                  Preview & Publish Survey
+                </h2>
                 <p className="text-slate-500">
-                  Review your survey before publishing it to {audience.targetCount.toLocaleString()} respondents.
+                  Review your survey before publishing it to{" "}
+                  {audience.targetCount.toLocaleString()} respondents.
                 </p>
               </div>
 
               <Tabs defaultValue="preview" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="preview" className="flex items-center gap-2">
+                  <TabsTrigger
+                    value="preview"
+                    className="flex items-center gap-2"
+                  >
                     <Eye className="h-4 w-4" />
                     Preview Survey
                   </TabsTrigger>
@@ -491,7 +648,11 @@ export default function GenerateSurvey() {
                 </TabsList>
 
                 <TabsContent value="preview" className="space-y-4">
-                  <SurveyPreview title={`${category} Survey`} description={prompt} questions={questions} />
+                  <SurveyPreview
+                    title={`${category} Survey`}
+                    description={prompt}
+                    questions={questions}
+                  />
                 </TabsContent>
 
                 <TabsContent value="code" className="space-y-4">
@@ -502,22 +663,27 @@ export default function GenerateSurvey() {
                   </Card>
                   <div className="text-center">
                     <p className="text-sm text-slate-500 mb-2">
-                      This multi-page HTML survey includes API integration, progress tracking, and keyboard navigation.
+                      This multi-page HTML survey includes API integration,
+                      progress tracking, and keyboard navigation.
                     </p>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         // Download the HTML file
-                        const blob = new Blob([surveyHtml], { type: "text/html" })
-                        const url = URL.createObjectURL(blob)
-                        const a = document.createElement("a")
-                        a.href = url
-                        a.download = `${category.toLowerCase().replace(/\s+/g, "-")}_survey.html`
-                        document.body.appendChild(a)
-                        a.click()
-                        document.body.removeChild(a)
-                        URL.revokeObjectURL(url)
+                        const blob = new Blob([surveyHtml], {
+                          type: "text/html",
+                        });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `${category
+                          .toLowerCase()
+                          .replace(/\s+/g, "-")}_survey.html`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
                       }}
                     >
                       Download HTML File
@@ -531,7 +697,11 @@ export default function GenerateSurvey() {
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back
                 </Button>
-                <Button onClick={handlePublishSurvey} size="lg" disabled={createLoading}>
+                <Button
+                  onClick={handlePublishSurvey}
+                  size="lg"
+                  disabled={createLoading}
+                >
                   {createLoading ? (
                     <>
                       <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -539,7 +709,8 @@ export default function GenerateSurvey() {
                     </>
                   ) : (
                     <>
-                      Publish Survey to {audience.targetCount.toLocaleString()} People
+                      Publish Survey to {audience.targetCount.toLocaleString()}{" "}
+                      People
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
@@ -550,5 +721,5 @@ export default function GenerateSurvey() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
 // API configuration and base functions
-const API_BASE_URL = "https://survey-backend-ts76.onrender.com"
+const API_BASE_URL = "https://518fc852-4eb8-489a-a3ac-03351eb3fd2d-00-3iasr5f5e5urj.spock.replit.dev"
 
 // Get JWT token from localStorage or your auth system
 const getAuthToken = (): string | null => {
@@ -377,6 +377,37 @@ export const surveyApi = {
       body: JSON.stringify(surveyData),
     })
   },
+
+
+  // Create HTML
+
+  // Post /api/surveys/:id/create-html
+
+  htmlCreate: async (
+    id: string,
+    data: {
+      campaignName?: string
+      selectedAudience?: string[]
+    },
+  ): Promise<ApiResponse<{
+    survey: {
+      surveyId: string;
+      publicUrl: string;
+      htmlContent: string;
+      updatedAt: string;
+    }, email: {
+      sent: number;
+      failed: number;
+      errors: string[];
+      campaignId: string;
+    }
+  }>> => {
+    return apiRequest(`/api/surveys/${id}/create-html`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    })
+  },
+
 
   // PUT /api/surveys/:id
   updateSurvey: async (

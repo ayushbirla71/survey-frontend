@@ -94,7 +94,7 @@ export function useMutation<T, P = any>(mutationFn: (params: P) => Promise<ApiRe
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const mutate = async (params: P): Promise<T | null> => {
+  const mutate = async (params: P, htmlData: { audience: string[]; campaignName: string }): Promise<T | null> => {
     try {
       setLoading(true)
       setError(null)
