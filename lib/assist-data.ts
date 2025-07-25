@@ -195,7 +195,7 @@ export function updateDashboardStats() {
 
 // Survey results data
 export const surveyResults = {
-  "137078fa-624a-4d49-9f85-6e5de2cfd464": {
+  "survey-1": {
     title: "IT Professional Work Satisfaction",
     description: "Understanding job satisfaction levels among IT professionals",
     stats: {

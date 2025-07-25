@@ -54,7 +54,7 @@ export default function SurveyResults() {
   // Use API data if available, otherwise use demo data
   let survey = null;
   if (surveyId === "137078fa-624a-4d49-9f85-6e5de2cfd464") {
-    survey = surveyResults[surveyId];
+    survey = surveyResults["survey-1"];
   } else {
     survey = results || surveyResults[surveyId] || surveyResults["survey-1"];
   }
@@ -92,7 +92,7 @@ export default function SurveyResults() {
           </Button>
           <div className="flex-1">
             <h1 className="text-3xl font-bold text-slate-800">
-              {survey?.title}
+              {survey.title}
             </h1>
             <p className="text-slate-500">{survey.description}</p>
           </div>
