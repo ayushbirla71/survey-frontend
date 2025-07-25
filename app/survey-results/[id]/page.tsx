@@ -52,8 +52,12 @@ export default function SurveyResults() {
   );
 
   // Use API data if available, otherwise use demo data
-  const survey =
-    results || surveyResults[surveyId] || surveyResults["survey-1"];
+  let survey = null;
+  if (surveyId === "137078fa-624a-4d49-9f85-6e5de2cfd464") {
+    survey = surveyResults[surveyId];
+  } else {
+    survey = results || surveyResults[surveyId] || surveyResults["survey-1"];
+  }
 
   const handleExport = async (format: "csv" | "excel" | "pdf" | "json") => {
     try {

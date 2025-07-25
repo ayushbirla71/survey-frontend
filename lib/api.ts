@@ -1,5 +1,6 @@
 // API configuration and base functions
 const API_BASE_URL = "https://1ad5f39a-7c6d-4d67-a9cc-7923fd07b12a-00-owc4pivv8zuc.spock.replit.dev"
+// const API_BASE_URL = "http://localhost:5000"
 
 // Get JWT token from localStorage or your auth system
 const getAuthToken = (): string | null => {
