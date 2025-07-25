@@ -1,5 +1,5 @@
 // API configuration and base functions
-const API_BASE_URL = "https://survey-backend-ts76.onrender.com"
+const API_BASE_URL = "https://1ad5f39a-7c6d-4d67-a9cc-7923fd07b12a-00-owc4pivv8zuc.spock.replit.dev"
 
 // Get JWT token from localStorage or your auth system
 const getAuthToken = (): string | null => {
@@ -78,7 +78,7 @@ export const publicSurveyApi = {
       category: string
       questions: Array<{
         id: string
-        type: "multiple_choice" | "checkbox" | "text" | "rating"
+        type: "single_choice" | "checkbox" | "text" | "rating"
         question: string
         options?: string[]
         required: boolean
@@ -167,7 +167,7 @@ export const questionGenerationApi = {
       questionCount: number
       questions: Array<{
         id: string
-        type: "multiple_choice" | "checkbox" | "text" | "rating" | "yes_no"
+        type: "single_choice" | "checkbox" | "text" | "rating" | "yes_no"
         question: string
         options: string[]
         required: boolean
@@ -194,7 +194,7 @@ export const questionGenerationApi = {
       category: string
       questions: Array<{
         id: string
-        type: "multiple_choice" | "checkbox" | "text" | "rating" | "yes_no"
+        type: "single_choice" | "checkbox" | "text" | "rating" | "yes_no"
         question: string
         options: string[]
         required: boolean
@@ -322,7 +322,7 @@ export const surveyApi = {
       status: "active" | "completed" | "draft"
       questions: Array<{
         id: string
-        type: "multiple_choice" | "checkbox" | "text" | "rating"
+        type: "single_choice" | "checkbox" | "text" | "rating"
         question: string
         options?: string[]
         required: boolean
@@ -351,7 +351,7 @@ export const surveyApi = {
     description: string
     category: string
     questions: Array<{
-      type: "multiple_choice" | "checkbox" | "text" | "rating"
+      type: "single_choice" | "checkbox" | "text" | "rating"
       question: string
       options?: string[]
       required: boolean
@@ -418,7 +418,7 @@ export const surveyApi = {
       status?: "active" | "completed" | "draft"
       questions?: Array<{
         id?: string
-        type: "multiple_choice" | "checkbox" | "text" | "rating"
+        type: "single_choice" | "checkbox" | "text" | "rating"
         question: string
         options?: string[]
         required: boolean
@@ -491,7 +491,7 @@ export const surveyResultsApi = {
       questionResults: Array<{
         questionId: string
         question: string
-        type: "multiple_choice" | "checkbox" | "text" | "rating"
+        type: "single_choice" | "checkbox" | "text" | "rating"
         responses: number
         data: Array<{ option: string; count: number; percentage: number }>
         averageRating?: number
@@ -842,7 +842,7 @@ export const demoData = {
     questions: [
       {
         id: "demo_q1",
-        type: "multiple_choice" as const,
+        type: "single_choice" as const,
         question: "How satisfied are you with your current remote work setup?",
         options: ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
         required: true,

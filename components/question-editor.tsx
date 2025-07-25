@@ -90,7 +90,7 @@ export default function QuestionEditor({
   const addQuestion = () => {
     const newQuestion = {
       id: `q${Date.now()}`,
-      type: "multiple_choice",
+      type: "single_choice",
       question: "New Question",
       options: ["Option 1", "Option 2"],
       required: false,
@@ -253,8 +253,8 @@ export default function QuestionEditor({
                             <SelectValue placeholder="Select question type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="multiple_choice">
-                              Multiple Choice
+                            <SelectItem value="single_choice">
+                              Single Choice
                             </SelectItem>
                             <SelectItem value="checkbox">Checkbox</SelectItem>
                             <SelectItem value="text">Text</SelectItem>
@@ -283,7 +283,7 @@ export default function QuestionEditor({
                         </Label>
                       </div>
 
-                      {(question.type === "multiple_choice" ||
+                      {(question.type === "single_choice" ||
                         question.type === "checkbox") && (
                         <div className="space-y-3">
                           <Label className="text-sm font-medium">

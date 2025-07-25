@@ -87,7 +87,7 @@ export const categories = [
 export const sampleQuestions = [
   {
     id: "q1",
-    type: "multiple_choice",
+    type: "single_choice",
     question: "How satisfied are you with our product?",
     options: ["Very Satisfied", "Satisfied", "Neutral", "Dissatisfied", "Very Dissatisfied"],
     required: true,
@@ -207,7 +207,7 @@ export const surveyResults = {
     questionResults: [
       {
         question: "How satisfied are you with your current role?",
-        type: "multiple_choice",
+        type: "single_choice",
         responses: 320,
         data: [
           { option: "Very Satisfied", count: 96, percentage: 30 },

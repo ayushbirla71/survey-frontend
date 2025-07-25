@@ -1,24 +1,24 @@
 // Update the SurveyData interface to include id
 interface Question {
-  id: string
-  type: string
-  question: string
-  options?: string[]
-  required: boolean
+    id: string
+    type: string
+    question: string
+    options?: string[]
+    required: boolean
 }
 
 interface SurveyData {
-  id?: string
-  title: string
-  description: string
-  questions: Question[]
+    id?: string
+    title: string
+    description: string
+    questions: Question[]
 }
 
 // Update the function signature and usage
 export function generateSurveyHtml(surveyData: SurveyData): string {
-  const surveyId = surveyData.id || `survey-${Date.now()}`
+    const surveyId = surveyData.id || `survey-${Date.now()}`
 
-  return `<!DOCTYPE html>
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -772,52 +772,50 @@ export function generateSurveyHtml(surveyData: SurveyData): string {
 }
 
 function generateQuestionPageHtml(question: Question, index: number, totalQuestions: number): string {
-  const questionNumber = index + 1
-  const requiredMark = question.required ? '<span class="required">*</span>' : ""
+    const questionNumber = index + 1
+    const requiredMark = question.required ? '<span class="required">*</span>' : ""
 
-  let optionsHtml = ""
+    let optionsHtml = ""
 
-  switch (question.type) {
-    case "multiple_choice":
-      optionsHtml = `
+    switch (question.type) {
+        case "single_choice":
+            optionsHtml = `
         <div class="option-group">
-          ${
-            question.options
-              ?.map(
-                (option, optIndex) => `
+          ${question.options
+                    ?.map(
+                        (option, optIndex) => `
             <div class="option">
               <input type="radio" id="${question.id}_${optIndex}" name="${question.id}" value="${option}" ${question.required ? "required" : ""}>
               <label for="${question.id}_${optIndex}">${option}</label>
             </div>
           `,
-              )
-              .join("") || ""
-          }
+                    )
+                    .join("") || ""
+                }
         </div>
       `
-      break
+            break
 
-    case "checkbox":
-      optionsHtml = `
+        case "checkbox":
+            optionsHtml = `
         <div class="option-group">
-          ${
-            question.options
-              ?.map(
-                (option, optIndex) => `
+          ${question.options
+                    ?.map(
+                        (option, optIndex) => `
             <div class="option">
               <input type="checkbox" id="${question.id}_${optIndex}" name="${question.id}" value="${option}">
               <label for="${question.id}_${optIndex}">${option}</label>
             </div>
           `,
-              )
-              .join("") || ""
-          }
+                    )
+                    .join("") || ""
+                }
         </div>
       `
-      break
+            break
 
-    case "text":
-      optionsHtml = `
+        case "text":
+            optionsHtml = `
         <textarea 
           name="${question.id}" 
           class="text-input" 
@@ -825,22 +823,21 @@ function generateQuestionPageHtml(question: Question, index: number, totalQuesti
           ${question.required ? "required" : ""}
         ></textarea>
       `
-      break
+            break
 
-    case "rating":
-      optionsHtml = `
+        case "rating":
+            optionsHtml = `
         <div class="rating-group">
-          ${
-            question.options
-              ?.map(
-                (option) => `
+          ${question.options
+                    ?.map(
+                        (option) => `
             <div class="rating-button" data-rating="${option}">
               ${option}
             </div>
           `,
-              )
-              .join("") || ""
-          }
+                    )
+                    .join("") || ""
+                }
         </div>
         <div class="rating-labels">
           <span>Not likely</span>
@@ -848,13 +845,13 @@ function generateQuestionPageHtml(question: Question, index: number, totalQuesti
         </div>
         <input type="hidden" name="${question.id}" id="${question.id}_hidden" ${question.required ? "required" : ""}>
       `
-      break
+            break
 
-    default:
-      optionsHtml = `<p>Unsupported question type: ${question.type}</p>`
-  }
+        default:
+            optionsHtml = `<p>Unsupported question type: ${question.type}</p>`
+    }
 
-  return `
+    return `
     <div class="question-page" id="question-${index}" data-question-id="${question.id}">
       <div class="question-counter">Question ${questionNumber} of ${totalQuestions}</div>
       <div class="question-block">

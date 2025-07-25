@@ -47,7 +47,7 @@ export default function SurveyPreview({
                 </h3>
               </div>
 
-              {q.type === "multiple_choice" && (
+              {q.type === "single_choice" && (
                 <RadioGroup className="space-y-2">
                   {q.options?.map((option, i) => (
                     <div key={i} className="flex items-center space-x-2">
